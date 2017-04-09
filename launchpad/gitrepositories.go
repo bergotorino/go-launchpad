@@ -76,7 +76,7 @@ type MergeProposal struct {
 	AllCommentsCollectionLink     string      `json:"all_comments_collection_link"`
 	BugsCollectionLink            string      `json:"bugs_collection_link"`
 	CommitMessage                 string      `json:"commit_message"`
-	DateCreated                   string      `json:"date_created"`
+	DateCreated                   time.Time   `json:"date_created"`
 	DateMerged                    string      `json:"date_merged"`
 	DateReviewRequested           string      `json:"date_review_requested"`
 	DateReviewed                  string      `json:"date_reviewed"`

@@ -33,6 +33,32 @@ func (gr *GitRepositories) GetByPath(path string) (*GitRepository, error) {
 	return &data, nil
 }
 
+func (gr *GitRepositories) GetRepositories(target string) ([]GitRepository, error) {
+	v := url.Values{}
+	v.Add("target", target)
+	v.Add("ws.op", "getRepositories")
+
+	response, err := gr.lp.Get("https://api.launchpad.net/devel/+git", v)
+	if err != nil {
+		log.Println("API returned failure", err)
+		return nil, err
+	}
+
+	data := struct {
+		Entries   []GitRepository `json:"entries"`
+		Start     int             `json:"start"`
+		TotalSize int             `json:"total_size"`
+	}{}
+
+	err = gr.lp.DecodeResponse(response, &data)
+	if err != nil {
+		log.Println("Decoding error: ", err)
+		return nil, err
+	}
+
+	return data.Entries, nil
+}
+
 type GitRepository struct {
 	UniqueName                      string      `json:"unique_name"`
 	DateLastModified                time.Time   `json:"date_last_modified"`

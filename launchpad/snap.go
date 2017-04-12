@@ -61,7 +61,7 @@ func (s Snap) Processors() ([]Processor, error) {
 		TotalSize        int         `json:"total_size"`
 	}{}
 
-	err = s.lp.DecodeResponse(response, &data)
+	err = DecodeResponse(response, &data)
 	if err != nil {
 		log.Println("Decoding error: ", err)
 		return nil, err

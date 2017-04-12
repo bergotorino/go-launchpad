@@ -22,7 +22,7 @@ func (gr *GitRepositories) GetByPath(path string) (*GitRepository, error) {
 	}
 
 	var data GitRepository
-	err = gr.lp.DecodeResponse(response, &data)
+	err = DecodeResponse(response, &data)
 	if err != nil {
 		log.Println("Decoding went bad")
 		return nil, err
@@ -50,7 +50,7 @@ func (gr *GitRepositories) GetRepositories(target string) ([]GitRepository, erro
 		TotalSize int             `json:"total_size"`
 	}{}
 
-	err = gr.lp.DecodeResponse(response, &data)
+	err = DecodeResponse(response, &data)
 	if err != nil {
 		log.Println("Decoding error: ", err)
 		return nil, err
@@ -151,7 +151,7 @@ func (gr *GitRepository) LandingTargets() ([]MergeProposal, error) {
 		TotalSize        int             `json:"total_size"`
 	}{}
 
-	err = gr.lp.DecodeResponse(response, &data)
+	err = DecodeResponse(response, &data)
 	if err != nil {
 		log.Println("Decoding error: ", err)
 		return nil, err
@@ -176,7 +176,7 @@ func (gr *GitRepository) LandingCandidates() ([]MergeProposal, error) {
 		TotalSize        int             `json:"total_size"`
 	}{}
 
-	err = gr.lp.DecodeResponse(response, &data)
+	err = DecodeResponse(response, &data)
 	if err != nil {
 		log.Println("Decoding error: ", err)
 		return nil, err

@@ -1,12 +1,8 @@
 package launchpad
 
 import (
-	"compress/gzip"
-	"encoding/json"
 	"fmt"
 	"github.com/bergotorino/go-oauth/oauth"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -122,35 +118,6 @@ func (l *Launchpad) doLogin() error {
 	return nil
 }
 
-// DecodeResponse decodes the JSON response
-func (l *Launchpad) DecodeResponse(resp *http.Response, data interface{}) error {
-	if resp.StatusCode != 200 {
-		p, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("get %s returned status %d, %s", resp.Request.URL, resp.StatusCode, p)
-	}
-
-	var reader io.ReadCloser
-	switch resp.Header.Get("Content-Encoding") {
-	case "gzip":
-		reader, err := gzip.NewReader(resp.Body)
-		if err != nil {
-			return err
-		}
-		defer reader.Close()
-	default:
-		reader = resp.Body
-	}
-
-	body, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return err
-	}
-
-	json.Unmarshal(body, &data)
-
-	return nil
-}
-
 func (l *Launchpad) People(name string) (*Person, error) {
 	response, err := l.Get("https://api.launchpad.net/devel/~"+name, nil)
 	if err != nil {
@@ -159,7 +126,7 @@ func (l *Launchpad) People(name string) (*Person, error) {
 	defer response.Body.Close()
 
 	var data Person
-	err = l.DecodeResponse(response, &data)
+	err = DecodeResponse(response, &data)
 	if err != nil {
 		return nil, err
 	}

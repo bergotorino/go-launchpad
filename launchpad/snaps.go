@@ -22,7 +22,7 @@ func (s *Snaps) GetByName(name string, owner string) (*Snap, error) {
 	}
 
 	var data Snap
-	err = s.lp.DecodeResponse(response, &data)
+	err = DecodeResponse(response, &data)
 	if err != nil {
 		log.Println("Decoding went bad")
 		return nil, err

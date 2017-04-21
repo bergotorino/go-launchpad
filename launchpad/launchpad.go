@@ -16,7 +16,7 @@ type Launchpad struct {
 	appName     string
 	consumerKey string
 	secrets     LaunchpadSecrets
-	oauthClient oauth.Client
+	oauthClient oauth.AbstractClient
 }
 
 func LoginWith(s LaunchpadSecrets, applicationName string) (*Launchpad, error) {
@@ -38,7 +38,7 @@ func newLaunchpadClient(s LaunchpadSecrets, appName string) *Launchpad {
 	}
 
 	lp := Launchpad{appName: appName, secrets: s,
-		oauthClient: oauth.Client{
+		oauthClient: &oauth.Client{
 			TemporaryCredentialRequestURI: "https://launchpad.net/+request-token",
 			ResourceOwnerAuthorizationURI: "https://launchpad.net/+authorize-token",
 			TokenRequestURI:               "https://launchpad.net/+access-token",

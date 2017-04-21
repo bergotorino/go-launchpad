@@ -108,12 +108,11 @@ func (l *Launchpad) doLogin() error {
 	l.secrets.Store()
 
 	// Launchpad requires that certain Headers are set
-	l.oauthClient.Header = make(map[string][]string)
-	l.oauthClient.Header.Set("accept", "application/json")
-	l.oauthClient.Header.Set("accept-encoding", "gzip, deflate")
-	l.oauthClient.Header.Set("Referer", "https://launchpad.net/")
+	l.oauthClient.SetCustomHeader("accept", "application/json")
+	l.oauthClient.SetCustomHeader("accept-encoding", "gzip, deflate")
+	l.oauthClient.SetCustomHeader("Referer", "https://launchpad.net/")
 	userAgent := fmt.Sprintf("application=\"%s\"; oauth_consumer=\"%s\"", l.appName, l.consumerKey)
-	l.oauthClient.Header.Set("user-agent", userAgent)
+	l.oauthClient.SetCustomHeader("user-agent", userAgent)
 
 	return nil
 }

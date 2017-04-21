@@ -46,6 +46,30 @@ func (s Snap) String() string {
 	return s.WebLink
 }
 
+func (s Snap) CompletedBuilds() ([]Build, error) {
+	v := url.Values{}
+	response, err := s.lp.Get(s.CompletedBuildsCollectionLink, v)
+	if err != nil {
+		log.Println("API error: ", err)
+		return nil, err
+	}
+
+	data := struct {
+		Entries          []Build `json:"entries"`
+		ResourceTypeLink string  `json:"resource_type_link"`
+		Start            int     `json:"start"`
+		TotalSize        int     `json:"total_size"`
+	}{}
+
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		log.Println("Decoding error: ", err)
+		return nil, err
+	}
+
+	return data.Entries, nil
+}
+
 func (s Snap) Processors() ([]Processor, error) {
 	v := url.Values{}
 	response, err := s.lp.Get(s.ProcessorsCollectionLink, v)

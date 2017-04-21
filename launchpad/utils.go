@@ -12,8 +12,7 @@ import (
 // DecodeResponse decodes the JSON response
 func DecodeResponse(resp *http.Response, data interface{}) error {
 	if resp.StatusCode != 200 {
-		p, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("get %s returned status %d, %s", resp.Request.URL, resp.StatusCode, p)
+		return fmt.Errorf("get %s returned status %d", resp.Request.URL, resp.StatusCode)
 	}
 
 	var reader io.ReadCloser

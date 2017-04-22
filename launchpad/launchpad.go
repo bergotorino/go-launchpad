@@ -5,7 +5,6 @@ import (
 	"github.com/bergotorino/go-oauth/oauth"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -20,56 +19,41 @@ type Launchpad struct {
 	oauthClient    oauth.AbstractClient
 }
 
-func LoginWith(sb SecretsBackend, applicationName string) (*Launchpad, error) {
-	launchpad := newLaunchpadClient(sb, applicationName)
-	err := launchpad.doLogin()
-	if err != nil {
-		return nil, err
-	}
-	return launchpad, nil
-}
+func NewClient(client oauth.AbstractClient, name string) *Launchpad {
+	lp := Launchpad{appName: name}
 
-func newLaunchpadClient(sb SecretsBackend, appName string) *Launchpad {
-
-	consumerKey := "System-wide: Ubuntu"
-
-	hostname, err := os.Hostname()
-	if err == nil {
-		consumerKey += fmt.Sprintf(" (%s)", hostname)
-	}
-
-	lp := Launchpad{appName: appName, secretsBackend: sb,
-		oauthClient: &oauth.Client{
+	if client == nil {
+		lp.oauthClient = &oauth.Client{
 			TemporaryCredentialRequestURI: "https://launchpad.net/+request-token",
 			ResourceOwnerAuthorizationURI: "https://launchpad.net/+authorize-token",
 			TokenRequestURI:               "https://launchpad.net/+access-token",
 			Credentials: oauth.Credentials{
-				Token:  consumerKey,
+				Token:  MakeConsumerKey(),
 				Secret: "",
 			},
 			SignatureMethod: oauth.PLAINTEXT,
-		}}
+		}
+	} else {
+		lp.oauthClient = client
+	}
 
 	return &lp
 }
 
-func (l *Launchpad) Get(resource string, form url.Values) (*http.Response, error) {
-	return l.oauthClient.Get(nil, l.secrets.accessCredentials, resource, form)
-}
+func (l *Launchpad) LoginWith(sb SecretsBackend) error {
+	l.secretsBackend = sb
 
-func (l *Launchpad) doLogin() error {
-
-	// Secrets already loaded, i.e. we have been already logged in
-	// on this machine.
+	// Load secrets. If there is an error we do not fail but instead
+	// proceed with authentication.
 	err := l.secrets.Read(l.secretsBackend)
-	if err != nil {
-		return err
-	}
-	if l.secrets.IsValid() {
-		return nil
+	if err == nil {
+		if l.secrets.IsValid() {
+			return nil
+		}
 	}
 
-	// Not logged in before, proceed with auth process
+	// At this point we know that we have not been logged in before
+	// Let's proceed with auth process
 
 	tempCred, err := l.oauthClient.RequestTemporaryCredentials(nil, "", nil)
 	if err != nil {
@@ -120,6 +104,10 @@ func (l *Launchpad) doLogin() error {
 	l.oauthClient.SetCustomHeader("user-agent", userAgent)
 
 	return nil
+}
+
+func (l *Launchpad) Get(resource string, form url.Values) (*http.Response, error) {
+	return l.oauthClient.Get(nil, l.secrets.accessCredentials, resource, form)
 }
 
 func (l *Launchpad) People(name string) (*Person, error) {

@@ -40,3 +40,14 @@ func (s *LaunchpadSecretsSuite) TestReadAndWrite(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(wbuffer.Bytes(), DeepEquals, s.data)
 }
+
+func (s *LaunchpadSecretsSuite) TestReadEmpty(c *C) {
+	var ls launchpad.LaunchpadSecrets
+	var err error
+
+	var data = make([]byte, 512)
+	rbuffer := bytes.NewBuffer(data)
+	err = ls.Read(rbuffer)
+	c.Assert(err, Not(IsNil))
+	c.Assert(ls.IsValid(), Equals, false)
+}

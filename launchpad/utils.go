@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 // DecodeResponse decodes the JSON response
@@ -35,4 +36,14 @@ func DecodeResponse(resp *http.Response, data interface{}) error {
 	json.Unmarshal(body, &data)
 
 	return nil
+}
+
+// Make the consumer key
+func MakeConsumerKey() string {
+	consumerKey := "System-wide: Ubuntu"
+	hostname, err := os.Hostname()
+	if err == nil {
+		consumerKey += fmt.Sprintf(" (%s)", hostname)
+	}
+	return consumerKey
 }

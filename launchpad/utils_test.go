@@ -1,7 +1,9 @@
 package launchpad_test
 
 import (
+	"fmt"
 	. "gopkg.in/check.v1"
+	"os"
 
 	"bytes"
 	"io/ioutil"
@@ -58,6 +60,14 @@ func (s *UtilsSuite) TestDecodeResponseStatusCodeGoodGzipBad(c *C) {
 
 	err := launchpad.DecodeResponse(&response, &data)
 	c.Assert(err, Not(IsNil))
+}
+
+func (s *UtilsSuite) TestMakeConsumerKey(c *C) {
+	consumerKey := launchpad.MakeConsumerKey()
+	hostname, err := os.Hostname()
+	c.Assert(err, IsNil)
+	expectedConsumerKey := fmt.Sprintf("System-wide: Ubuntu (%s)", hostname)
+	c.Assert(consumerKey, DeepEquals, expectedConsumerKey)
 }
 
 /*

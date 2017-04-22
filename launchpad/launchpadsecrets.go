@@ -23,14 +23,14 @@ func (l *LaunchpadSecrets) Write(w io.Writer) error {
 }
 
 func (l *LaunchpadSecrets) Read(r io.Reader) error {
-	var data []byte
-	_, err := r.Read(data)
+	var data = make([]byte, 512)
+	n, err := r.Read(data)
 	if err != nil {
 		return err
 	}
 
 	var ac oauth.Credentials
-	err = json.Unmarshal(data, &ac)
+	err = json.Unmarshal(data[:n], &ac)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (l *LaunchpadSecrets) Read(r io.Reader) error {
 	return nil
 }
 
-type SecretsReaderWriter interface {
+type SecretsBackend interface {
 	Write(p []byte) (n int, err error)
 	Read(p []byte) (n int, err error)
 }

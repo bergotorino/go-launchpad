@@ -5,6 +5,7 @@ import (
 	"github.com/bergotorino/go-oauth/oauth"
 	"io"
 	"io/ioutil"
+	"os"
 )
 
 type LaunchpadSecrets struct {
@@ -56,11 +57,17 @@ func (s *SecretsFileBackend) Write(data []byte) (n int, err error) {
 }
 
 func (s *SecretsFileBackend) Read(data []byte) (n int, err error) {
-	data, err = ioutil.ReadFile(s.File)
+	f, err := os.Open(s.File)
 	if err != nil {
 		return 0, err
 	}
-	return len(data), nil
+	defer f.Close()
+	n, err = f.Read(data)
+	if err != nil {
+		return 0, err
+	}
+
+	return n, nil
 }
 
 func (l *LaunchpadSecrets) IsValid() bool {

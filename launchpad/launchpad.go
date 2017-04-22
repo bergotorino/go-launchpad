@@ -61,7 +61,10 @@ func (l *Launchpad) doLogin() error {
 
 	// Secrets already loaded, i.e. we have been already logged in
 	// on this machine.
-	l.secrets.Read(l.secretsBackend)
+	err := l.secrets.Read(l.secretsBackend)
+	if err != nil {
+		return err
+	}
 	if l.secrets.IsValid() {
 		return nil
 	}

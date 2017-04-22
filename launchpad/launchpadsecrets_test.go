@@ -17,8 +17,8 @@ type LaunchpadSecretsSuite struct {
 var _ = Suite(&LaunchpadSecretsSuite{})
 
 func (s *LaunchpadSecretsSuite) SetUpTest(c *C) {
-	s.ac.Token = "xxxyyyzzz"
-	s.ac.Secret = "aaabbbccc"
+	s.ac.Token = "Gl70PLC97z0TG6JdMCKs"
+	s.ac.Secret = "5GD8s3TBxQvNXSLML0K7HgzRwHlKCC9LTXN00nRW2HzKc2DBKS"
 	var err error
 	s.data, err = json.Marshal(s.ac)
 	c.Assert(err, IsNil)

@@ -13,14 +13,15 @@ import (
 const ACCESS_TOKEN_POOL_TIME = 10 * time.Second
 
 type Launchpad struct {
-	appName     string
-	consumerKey string
-	secrets     LaunchpadSecrets
-	oauthClient oauth.AbstractClient
+	appName        string
+	consumerKey    string
+	secrets        LaunchpadSecrets
+	secretsBackend SecretsBackend
+	oauthClient    oauth.AbstractClient
 }
 
-func LoginWith(s LaunchpadSecrets, applicationName string) (*Launchpad, error) {
-	launchpad := newLaunchpadClient(s, applicationName)
+func LoginWith(sb SecretsBackend, applicationName string) (*Launchpad, error) {
+	launchpad := newLaunchpadClient(sb, applicationName)
 	err := launchpad.doLogin()
 	if err != nil {
 		return nil, err
@@ -28,7 +29,7 @@ func LoginWith(s LaunchpadSecrets, applicationName string) (*Launchpad, error) {
 	return launchpad, nil
 }
 
-func newLaunchpadClient(s LaunchpadSecrets, appName string) *Launchpad {
+func newLaunchpadClient(sb SecretsBackend, appName string) *Launchpad {
 
 	consumerKey := "System-wide: Ubuntu"
 
@@ -37,7 +38,7 @@ func newLaunchpadClient(s LaunchpadSecrets, appName string) *Launchpad {
 		consumerKey += fmt.Sprintf(" (%s)", hostname)
 	}
 
-	lp := Launchpad{appName: appName, secrets: s,
+	lp := Launchpad{appName: appName, secretsBackend: sb,
 		oauthClient: &oauth.Client{
 			TemporaryCredentialRequestURI: "https://launchpad.net/+request-token",
 			ResourceOwnerAuthorizationURI: "https://launchpad.net/+authorize-token",
@@ -60,6 +61,7 @@ func (l *Launchpad) doLogin() error {
 
 	// Secrets already loaded, i.e. we have been already logged in
 	// on this machine.
+	l.secrets.Read(l.secretsBackend)
 	if l.secrets.IsValid() {
 		return nil
 	}
@@ -105,7 +107,7 @@ func (l *Launchpad) doLogin() error {
 		}
 	}
 
-	l.secrets.Store()
+	l.secrets.Write(l.secretsBackend)
 
 	// Launchpad requires that certain Headers are set
 	l.oauthClient.SetCustomHeader("accept", "application/json")

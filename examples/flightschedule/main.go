@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-
 	sb := launchpad.SecretsFileBackend{File: "./launchpad.secrets.json"}
 
-	lp, err := launchpad.LoginWith(&sb, "System-wide: Ubuntu(annapurna)")
+	lp := launchpad.NewClient(nil, "Example Client")
+	err := lp.LoginWith(&sb)
 	if err != nil {
 		log.Fatal("lp.Login: ", err)
 		return

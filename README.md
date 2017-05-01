@@ -29,8 +29,9 @@ simple applications offering read only functionality over data sets such as:
 
 ## Quick Start
 
-For a quick start check out the [Login Example](github.com/bergototino/go-launchpad/examples/login)
-to learn the fundamentals. As a next step read the code of a [Real Application](github.com/bergotorino/go-launchpad/examples/flightstatus/main.go) to get the feeling for overall.
+For a quick start check out the [Login Example](https://github.com/bergotorino/go-launchpad/blob/master/examples/login/main.go)
+to learn the fundamentals. As a next step read the code of a [More Advanced Example](https://github.com/bergotorino/go-launchpad/blob/master/examples/flightschedule/main.go)
+to get the feeling for overall.
 
 ## License
 

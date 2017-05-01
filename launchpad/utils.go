@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"github.com/bergotorino/go-oauth/oauth"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -46,4 +47,18 @@ func MakeConsumerKey() string {
 		consumerKey += fmt.Sprintf(" (%s)", hostname)
 	}
 	return consumerKey
+}
+
+// Returns default oauth Client for Launchpad.net access
+func DefaultOauthClient() *oauth.Client {
+	return &oauth.Client{
+		TemporaryCredentialRequestURI: "https://launchpad.net/+request-token",
+		ResourceOwnerAuthorizationURI: "https://launchpad.net/+authorize-token",
+		TokenRequestURI:               "https://launchpad.net/+access-token",
+		Credentials: oauth.Credentials{
+			Token:  MakeConsumerKey(),
+			Secret: "",
+		},
+		SignatureMethod: oauth.PLAINTEXT,
+	}
 }

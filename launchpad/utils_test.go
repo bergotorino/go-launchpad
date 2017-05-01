@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/bergotorino/go-launchpad/launchpad"
+	"github.com/bergotorino/go-oauth/oauth"
 )
 
 type UtilsSuite struct{}
@@ -68,6 +69,15 @@ func (s *UtilsSuite) TestMakeConsumerKey(c *C) {
 	c.Assert(err, IsNil)
 	expectedConsumerKey := fmt.Sprintf("System-wide: Ubuntu (%s)", hostname)
 	c.Assert(consumerKey, DeepEquals, expectedConsumerKey)
+}
+
+func (s *UtilsSuite) TestDefaultOauthClient(c *C) {
+	client := launchpad.DefaultOauthClient()
+	c.Assert(client.SignatureMethod, Equals, oauth.PLAINTEXT)
+	c.Assert(client.Credentials.Token, Equals, launchpad.MakeConsumerKey())
+	c.Assert(client.TemporaryCredentialRequestURI, Equals, "https://launchpad.net/+request-token")
+	c.Assert(client.ResourceOwnerAuthorizationURI, Equals, "https://launchpad.net/+authorize-token")
+	c.Assert(client.TokenRequestURI, Equals, "https://launchpad.net/+access-token")
 }
 
 /*

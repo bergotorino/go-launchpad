@@ -11,28 +11,30 @@ import (
 
 const ACCESS_TOKEN_POOL_TIME = 10 * time.Second
 
+type UserNotifier interface {
+	Notify(message string)
+}
+
+type CliNotifier struct{}
+
+func (c *CliNotifier) Notify(message string) {
+	fmt.Printf(message)
+}
+
 type Launchpad struct {
 	appName        string
 	consumerKey    string
 	secrets        LaunchpadSecrets
 	secretsBackend SecretsBackend
 	oauthClient    oauth.AbstractClient
+	Notifier       UserNotifier
 }
 
 func NewClient(client oauth.AbstractClient, name string) *Launchpad {
-	lp := Launchpad{appName: name}
+	lp := Launchpad{appName: name, Notifier: &CliNotifier{}}
 
 	if client == nil {
-		lp.oauthClient = &oauth.Client{
-			TemporaryCredentialRequestURI: "https://launchpad.net/+request-token",
-			ResourceOwnerAuthorizationURI: "https://launchpad.net/+authorize-token",
-			TokenRequestURI:               "https://launchpad.net/+access-token",
-			Credentials: oauth.Credentials{
-				Token:  MakeConsumerKey(),
-				Secret: "",
-			},
-			SignatureMethod: oauth.PLAINTEXT,
-		}
+		lp.oauthClient = DefaultOauthClient()
 	} else {
 		lp.oauthClient = client
 	}
@@ -64,9 +66,10 @@ func (l *Launchpad) LoginWith(sb SecretsBackend) error {
 	v.Set("allow_permission", "DESKTOP_INTEGRATION")
 	authURL := l.oauthClient.AuthorizationURL(tempCred, v)
 
-	fmt.Printf("Open this link:\n\n%s\n\n", authURL)
-	fmt.Printf("to authorize this program to access Launchpad on your behalf.\n")
-	fmt.Printf("Waiting to hear from Launchpad about your decision. . . .\n")
+	msg := fmt.Sprintf("Open this link:\n\n%s\n\n%s\n%s\n",
+		authURL, "to authorize this program to access Launchpad on your behalf",
+		"Waiting to hear from Launchpad about your decision")
+	l.Notifier.Notify(msg)
 
 	// Here comes the hack! At this point the user has been asked
 	// to authorize the application by visiting a URL. There is,

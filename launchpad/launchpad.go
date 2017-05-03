@@ -143,6 +143,7 @@ func (l *Launchpad) People(name string) (*Person, error) {
 		return nil, err
 	}
 
+	data.lp = l
 	return &data, nil
 }
 
@@ -152,4 +153,22 @@ func (l *Launchpad) Snaps() *Snaps {
 
 func (l *Launchpad) GitRepositories() *GitRepositories {
 	return &GitRepositories{lp: l}
+}
+
+func (l *Launchpad) Distributions(name string) (*Distribution, error) {
+	response, err := l.Get("https://api.launchpad.net/devel/"+name, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var data Distribution
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	data.lp = l
+
+	return &data, nil
 }

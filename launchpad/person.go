@@ -1,5 +1,10 @@
 package launchpad
 
+import (
+	"log"
+	"net/url"
+)
+
 type Person struct {
 	LanguagesCollectionLink                 string `json:"languages_collection_link"`
 	MembersCollectionLink                   string `json:"members_collection_link"`
@@ -51,4 +56,34 @@ type Person struct {
 	WikiNamesCollectionLink                 string `json:"wiki_names_collection_link"`
 	HomepageContent                         string `json:"homepage_content"`
 	JabberIdsCollectionLink                 string `json:"jabber_ids_collection_link"`
+
+	lp *Launchpad
+}
+
+func (p *Person) SearchTasks() ([]BugTask, error) {
+	v := url.Values{}
+	v.Add("ws.op", "searchTasks")
+	v.Add("order_by", "-date_last_updated")
+	v.Add("start", "0")
+
+	response, err := p.lp.Get(p.SelfLink, v)
+	if err != nil {
+		log.Println("API returned failure", err)
+		return nil, err
+	}
+
+	data := struct {
+		Entries            []BugTask `json:"entries"`
+		Start              int       `json:"start"`
+		TotalSizeLink      string    `json:"total_size_link"`
+		NextCollectionLink string    `json:"next_collection_link"`
+	}{}
+
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		log.Println("Decoding error: ", err)
+		return nil, err
+	}
+
+	return data.Entries, nil
 }

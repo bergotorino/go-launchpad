@@ -60,6 +60,58 @@ type Person struct {
 	lp *Launchpad
 }
 
+func (p *Person) MergeProposals() ([]MergeProposal, error) {
+	v := url.Values{}
+	v.Add("ws.op", "getMergeProposals")
+
+	response, err := p.lp.Get(p.SelfLink, v)
+	if err != nil {
+		log.Println("API returned failure", err)
+		return nil, err
+	}
+
+	data := struct {
+		Entries            []MergeProposal `json:"entries"`
+		Start              int             `json:"start"`
+		TotalSizeLink      string          `json:"total_size_link"`
+		NextCollectionLink string          `json:"next_collection_link"`
+	}{}
+
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		log.Println("Decoding error: ", err)
+		return nil, err
+	}
+
+	return data.Entries, nil
+}
+
+func (p *Person) RequestedReviews() ([]MergeProposal, error) {
+	v := url.Values{}
+	v.Add("ws.op", "getRequestedReviews")
+
+	response, err := p.lp.Get(p.SelfLink, v)
+	if err != nil {
+		log.Println("API returned failure", err)
+		return nil, err
+	}
+
+	data := struct {
+		Entries            []MergeProposal `json:"entries"`
+		Start              int             `json:"start"`
+		TotalSizeLink      string          `json:"total_size_link"`
+		NextCollectionLink string          `json:"next_collection_link"`
+	}{}
+
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		log.Println("Decoding error: ", err)
+		return nil, err
+	}
+
+	return data.Entries, nil
+}
+
 func (p *Person) SearchTasks() ([]BugTask, error) {
 	v := url.Values{}
 	v.Add("ws.op", "searchTasks")

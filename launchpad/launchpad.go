@@ -113,6 +113,23 @@ func (l *Launchpad) Get(resource string, form url.Values) (*http.Response, error
 	return l.oauthClient.Get(nil, l.secrets.accessCredentials, resource, form)
 }
 
+func (l *Launchpad) Me() (*Person, error) {
+	response, err := l.Get("https://api.launchpad.net/devel/people/+me", nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var data Person
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	data.lp = l
+	return &data, nil
+}
+
 func (l *Launchpad) People(name string) (*Person, error) {
 	response, err := l.Get("https://api.launchpad.net/devel/~"+name, nil)
 	if err != nil {

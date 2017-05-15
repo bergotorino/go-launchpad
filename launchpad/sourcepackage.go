@@ -23,6 +23,49 @@ type SourcePackage struct {
 	lp *Launchpad
 }
 
+type Bug struct {
+	UsersUnaffectedCollectionLink        string     `json:"users_unaffected_collection_link"`
+	LatestPatchUploaded                  *time.Time `json:"latest_patch_uploaded"`
+	UsersAffectedCountWithDupes          int        `json:"users_affected_count_with_dupes"`
+	SecurityRelated                      bool       `json:"security_related"`
+	Private                              bool       `json:"private"`
+	BugWatchesCollectionLink             string     `json:"bug_watches_collection_link"`
+	DateMadePrivate                      *time.Time `json:"date_made_private"`
+	LinkedBranchesCollectionLink         string     `json:"linked_branches_collection_link"`
+	SubscriptionsCollectionLink          string     `json:"subscriptions_collection_link"`
+	NumberOfDuplicates                   int        `json:"number_of_duplicates"`
+	ID                                   int        `json:"id"`
+	UsersUnaffectedCount                 int        `json:"users_unaffected_count"`
+	Title                                string     `json:"title"`
+	OtherUsersAffectedCountWithDupes     int        `json:"other_users_affected_count_with_dupes"`
+	Name                                 string     `json:"name"`
+	HTTPEtag                             string     `json:"http_etag"`
+	MessagesCollectionLink               string     `json:"messages_collection_link"`
+	SelfLink                             string     `json:"self_link"`
+	InformationType                      string     `json:"information_type"`
+	WhoMadePrivateLink                   string     `json:"who_made_private_link"`
+	AttachmentsCollectionLink            string     `json:"attachments_collection_link"`
+	ResourceTypeLink                     string     `json:"resource_type_link"`
+	ActivityCollectionLink               string     `json:"activity_collection_link"`
+	DateLastUpdated                      time.Time  `json:"date_last_updated"`
+	Description                          string     `json:"description"`
+	DuplicatesCollectionLink             string     `json:"duplicates_collection_link"`
+	Tags                                 []string   `json:"tags"`
+	MessageCount                         int        `json:"message_count"`
+	Heat                                 int        `json:"heat"`
+	BugTasksCollectionLink               string     `json:"bug_tasks_collection_link"`
+	DuplicateOfLink                      string     `json:"duplicate_of_link"`
+	LinkedMergeProposalsCollectionLink   string     `json:"linked_merge_proposals_collection_link"`
+	UsersAffectedWithDupesCollectionLink string     `json:"users_affected_with_dupes_collection_link"`
+	CvesCollectionLink                   string     `json:"cves_collection_link"`
+	WebLink                              string     `json:"web_link"`
+	UsersAffectedCount                   int        `json:"users_affected_count"`
+	OwnerLink                            string     `json:"owner_link"`
+	DateCreated                          *time.Time `json:"date_created"`
+	DateLastMessage                      *time.Time `json:"date_last_message"`
+	UsersAffectedCollectionLink          string     `json:"users_affected_collection_link"`
+}
+
 type BugTask struct {
 	DateClosed                 *time.Time `json:"date_closed"`
 	DateAssigned               *time.Time `json:"date_assigned"`
@@ -52,6 +95,8 @@ type BugTask struct {
 	DateCreated                *time.Time `json:"date_created"`
 	DateIncomplete             *time.Time `json:"date_incomplete"`
 	IsComplete                 bool       `json:"is_complete"`
+
+	Core Bug
 }
 
 func (s *SourcePackage) SearchBugs() ([]BugTask, error) {
@@ -77,6 +122,19 @@ func (s *SourcePackage) SearchBugs() ([]BugTask, error) {
 	if err != nil {
 		log.Println("Decoding error: ", err)
 		return nil, err
+	}
+	for i, _ := range data.Entries {
+		v := url.Values{}
+		response, err := s.lp.Get(data.Entries[i].BugLink, v)
+		if err != nil {
+			log.Println("Failed to fetch bug info", err)
+			return nil, err
+		}
+		err = DecodeResponse(response, &data.Entries[i].Core)
+		if err != nil {
+			log.Println("Decoding error: ", err)
+			return nil, err
+		}
 	}
 
 	return data.Entries, nil

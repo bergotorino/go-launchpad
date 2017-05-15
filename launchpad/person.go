@@ -137,5 +137,19 @@ func (p *Person) SearchTasks() ([]BugTask, error) {
 		return nil, err
 	}
 
+	for i, _ := range data.Entries {
+		v := url.Values{}
+		response, err := p.lp.Get(data.Entries[i].BugLink, v)
+		if err != nil {
+			log.Println("Failed to fetch bug info", err)
+			return nil, err
+		}
+		err = DecodeResponse(response, &data.Entries[i].Core)
+		if err != nil {
+			log.Println("Decoding error: ", err)
+			return nil, err
+		}
+	}
+
 	return data.Entries, nil
 }

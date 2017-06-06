@@ -99,13 +99,6 @@ func (l *Launchpad) LoginWith(sb SecretsBackend) error {
 
 	l.secrets.Write(l.secretsBackend)
 
-	// Launchpad requires that certain Headers are set
-	l.oauthClient.SetCustomHeader("accept", "application/json")
-	l.oauthClient.SetCustomHeader("accept-encoding", "gzip, deflate")
-	l.oauthClient.SetCustomHeader("Referer", "https://launchpad.net/")
-	userAgent := fmt.Sprintf("application=\"%s\"; oauth_consumer=\"%s\"", l.appName, l.consumerKey)
-	l.oauthClient.SetCustomHeader("user-agent", userAgent)
-
 	return nil
 }
 

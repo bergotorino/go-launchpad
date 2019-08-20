@@ -81,6 +81,29 @@ func (d *Distribution) GetSourcePackage(name string) (*SourcePackage, error) {
 	return &data, nil
 }
 
+func (d *Distribution) GetPrimaryArchive() (*Archive, error) {
+	v := url.Values{}
+	v.Add("name", "primary")
+	v.Add("ws.op", "getArchive")
+
+	response, err := d.lp.Get(d.SelfLink, v)
+	if err != nil {
+		log.Println("API returned failure", err)
+		return nil, err
+	}
+
+	var data Archive
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		log.Println("Decoding went bad")
+		return nil, err
+	}
+
+	data.lp = d.lp
+
+	return &data, nil
+}
+
 func (d *Distribution) SearchTasks() ([]BugTask, error) {
 	v := url.Values{}
 	v.Add("ws.op", "searchTasks")

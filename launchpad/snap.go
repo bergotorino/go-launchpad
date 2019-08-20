@@ -46,7 +46,7 @@ func (s Snap) String() string {
 	return s.WebLink
 }
 
-func (s Snap) CompletedBuilds() ([]Build, error) {
+func (s Snap) CompletedBuilds() ([]SnapBuild, error) {
 	v := url.Values{}
 	response, err := s.lp.Get(s.CompletedBuildsCollectionLink, v)
 	if err != nil {
@@ -55,16 +55,20 @@ func (s Snap) CompletedBuilds() ([]Build, error) {
 	}
 
 	data := struct {
-		Entries          []Build `json:"entries"`
-		ResourceTypeLink string  `json:"resource_type_link"`
-		Start            int     `json:"start"`
-		TotalSize        int     `json:"total_size"`
+		Entries          []SnapBuild `json:"entries"`
+		ResourceTypeLink string      `json:"resource_type_link"`
+		Start            int         `json:"start"`
+		TotalSize        int         `json:"total_size"`
 	}{}
 
 	err = DecodeResponse(response, &data)
 	if err != nil {
 		log.Println("Decoding error: ", err)
 		return nil, err
+	}
+
+	for i, _ := range data.Entries {
+		data.Entries[i].lp = s.lp
 	}
 
 	return data.Entries, nil

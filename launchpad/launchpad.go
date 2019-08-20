@@ -3,6 +3,7 @@ package launchpad
 import (
 	"fmt"
 	"github.com/bergotorino/go-oauth/oauth"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -156,6 +157,45 @@ func (l *Launchpad) Distributions(name string) (*Distribution, error) {
 	defer response.Body.Close()
 
 	var data Distribution
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	data.lp = l
+
+	return &data, nil
+}
+
+func (l *Launchpad) GetFileUrlsFromSnapBuild(build SnapBuild) ([]string, error) {
+	v := url.Values{}
+	v.Add("ws.op", "getFileUrls")
+
+	response, err := l.Get(build.SelfLink, v)
+	if err != nil {
+		log.Println("API returned failure", err)
+		return nil, err
+	}
+
+	var data []string
+
+	err = DecodeResponse(response, &data)
+	if err != nil {
+		log.Println("Decoding error: ", err)
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (l *Launchpad) NewBuild(build string) (*Build, error) {
+	response, err := l.Get(build, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var data Build
 	err = DecodeResponse(response, &data)
 	if err != nil {
 		return nil, err

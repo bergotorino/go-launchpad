@@ -62,3 +62,11 @@ func DefaultOauthClient() *oauth.Client {
 		SignatureMethod: oauth.PLAINTEXT,
 	}
 }
+
+func CreateSeriesUrl(series string) string {
+	return "https://api.launchpad.net/devel/ubuntu/" + series
+}
+
+func CreateSeriesArchUrl(series string, arch string) string {
+	return "https://api.launchpad.net/devel/ubuntu/" + series + "/" + arch
+}
